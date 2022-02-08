@@ -25,7 +25,7 @@ describe("Test /deposit Endpoint", () => {
       });
 
     expect(res.status).toEqual(200);
-    expect(res.body.deposit).toBe(10);
+    expect(res.body.user.deposit).toBe(10);
   });
 });
 

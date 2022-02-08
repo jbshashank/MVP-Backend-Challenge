@@ -27,7 +27,11 @@ const endpointsCtrl = {
           id: user.id,
         },
       });
-      res.send(newUser);
+      res.send({
+        error: false,
+        msg: "Amount successfully deposited.",
+        user: newUser,
+      });
     } else {
       res.send({
         error: true,
