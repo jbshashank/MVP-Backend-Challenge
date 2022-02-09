@@ -34,33 +34,59 @@ const productsCtrl = {
   editProduct: async (req, res, next) => {
     // auth
     // edit product
+    const user = req.user;
     const { amountAvailable, cost, productName, sellerId } = req.body;
     try {
-      const newProduct = await prisma.product.update({
-        data: {
-          amountAvailable: +amountAvailable,
-          cost: +cost,
-          productName,
-          sellerId: +sellerId,
-        },
-        where: {
-          id: req.params.id,
-        },
-      });
-      return res.send(newProduct);
+      // check the product was created by seller
+      if (user.id === sellerId) {
+        const newProduct = await prisma.product.update({
+          data: {
+            amountAvailable: +amountAvailable,
+            cost: +cost,
+            productName,
+            sellerId: +sellerId,
+          },
+          where: {
+            id: req.params.id,
+          },
+        });
+        return res.send(newProduct);
+      } else {
+        res.send({
+          error: true,
+          msg: "The product creator must be the person to edit it.",
+        });
+      }
     } catch (error) {
-      return res.send({ error });
+      return res.status(500).send({ error });
     }
   },
   deleteProduct: async (req, res, next) => {
     // auth
     // delete product
-    const product = await prisma.product.delete({
-      where: {
-        id: +req.params.id,
-      },
-    });
-    res.send(product);
+    try {
+      const user = req.user;
+      const prd = await prisma.product.findFirst({
+        where: {
+          id: +req.params.id,
+        },
+      });
+      if (prd.sellerId === user.id) {
+        const product = await prisma.product.delete({
+          where: {
+            id: +req.params.id,
+          },
+        });
+        res.send(product);
+      } else {
+        res.send({
+          error: true,
+          msg: "The product creator must be the person to delete it.",
+        });
+      }
+    } catch (error) {
+      return res.status(500).send({ error });
+    }
   },
 };
 

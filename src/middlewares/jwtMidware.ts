@@ -27,11 +27,15 @@ function jwtAuth(req, res, next) {
       method: "POST",
       url: "/users/login",
     },
+    {
+      method: "GET",
+      url: "/products",
+    },
   ];
   const isApiAuth = excludeApis.find(
     (callbackFn) =>
       callbackFn.method.toLocaleLowerCase() === method.toLocaleLowerCase() &&
-      callbackFn.url === url
+      url.startsWith(callbackFn.url)
   );
   if (!isApiAuth) {
     if (req.headers && req.headers.authorization) {
