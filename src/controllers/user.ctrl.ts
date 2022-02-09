@@ -30,6 +30,14 @@ const userCtrl = {
             ),
           });
         } else if (user.loggedIn === 0) {
+          await prisma.user.update({
+            data: {
+              loggedIn: 1,
+            },
+            where: {
+              id: user.id,
+            },
+          });
           // create and return the json web token
           res.send({
             user,
@@ -177,19 +185,54 @@ const userCtrl = {
     next();
   },
   logOutAll: async function (req, res, next) {
+    const { password, username } = req.body;
+    try {
+      const user = await prisma.user.findFirst({
+        where: { username },
+      });
+
+      const valid = await bcrypt.compare(password, user.password);
+      if (!valid) {
+        res.send({ error: true, msg: "Password does not match." });
+      } else {
+        await prisma.user.update({
+          data: {
+            loggedIn: 0,
+          },
+          where: {
+            id: user.id,
+          },
+        });
+        res.send({
+          msg: "All users logged out.",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({ error: true, msg: error });
+    }
+  },
+  logOut: async function (req, res, next) {
+    const { id } = req.body;
     try {
       const user = req.user;
-      await prisma.user.update({
-        data: {
-          loggedIn: 0,
-        },
-        where: {
-          id: user.id,
-        },
-      });
-      res.send({
-        msg: "All users logged out.",
-      });
+      if (id === user.id) {
+        await prisma.user.update({
+          data: {
+            loggedIn: 0,
+          },
+          where: {
+            id: user.id,
+          },
+        });
+        res.send({
+          msg: "User logged out.",
+        });
+      } else {
+        res.send({
+          error: true,
+          msg: "Id mismatch.",
+        });
+      }
     } catch (error) {
       res.status(500).send({ error: true, msg: error });
     }

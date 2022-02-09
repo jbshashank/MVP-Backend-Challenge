@@ -69,7 +69,7 @@ const endpointsCtrl = {
           if (userData?.deposit >= totalCost) {
             await prisma.user.update({
               data: {
-                deposit: +userData?.deposit - totalCost,
+                deposit: +userData?.deposit - +totalCost,
               },
               where: {
                 id: +user.id,
@@ -77,7 +77,7 @@ const endpointsCtrl = {
             });
             await prisma.product.update({
               data: {
-                amountAvailable: +product.amountAvailable - amountOfProducts,
+                amountAvailable: +product.amountAvailable - +amountOfProducts,
               },
               where: {
                 id: +product.id,

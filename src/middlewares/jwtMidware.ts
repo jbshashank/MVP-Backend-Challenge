@@ -31,6 +31,10 @@ function jwtAuth(req, res, next) {
       method: "GET",
       url: "/products",
     },
+    {
+      method: "POST",
+      url: "/users/logout/all",
+    },
   ];
   const isApiAuth = excludeApis.find(
     (callbackFn) =>
