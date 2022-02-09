@@ -34,27 +34,48 @@ const userCtrl = {
   },
 
   getUserMe: async (req, res, next) => {
-    const user = req.user;
-    const _user = await prisma.user.findFirst({
-      where: {
-        id: user.id,
-      },
-    });
-    return res.send(_user);
+    try {
+      const user = req.user;
+      const _user = await prisma.user.findFirst({
+        where: {
+          id: user.id,
+        },
+      });
+      return res.send(_user);
+    } catch (error) {
+      res.status(500).send({
+        error: true,
+        msg: error,
+      });
+    }
   },
 
   getUser: async (req, res, next) => {
-    const user = await prisma.user.findFirst({
-      where: {
-        id: req.params.id,
-      },
-    });
-    return res.send(user);
+    try {
+      const user = await prisma.user.findFirst({
+        where: {
+          id: req.params.id,
+        },
+      });
+      return res.send(user);
+    } catch (error) {
+      res.status(500).send({
+        error: true,
+        msg: error,
+      });
+    }
   },
 
   getUsers: async (req, res, next) => {
-    const users = await prisma.user.findMany({});
-    return res.send(users);
+    try {
+      const users = await prisma.user.findMany({});
+      return res.send(users);
+    } catch (error) {
+      res.status(500).send({
+        error: true,
+        msg: error,
+      });
+    }
   },
 
   editUser: async (req, res, next) => {
@@ -75,20 +96,42 @@ const userCtrl = {
     }
   },
   deleteUser: async (req, res, next) => {
-    return await prisma.user.delete({
-      where: {
-        id: req.params.id,
-      },
-    });
+    try {
+      const user = await prisma.user.delete({
+        where: {
+          id: req.params.id,
+        },
+      });
+      res.send({
+        user,
+        msg: "User deleted.",
+      });
+      next();
+    } catch (error) {
+      res.status(500).semd({
+        error: true,
+        msg: error,
+      });
+    }
   },
 
   getUserByUsername: async (req, res, next) => {
     var username = req.params.username;
-    if (req.user) {
-      var user = req.user;
+    try {
+      const _user = await prisma.user.findFirst({
+        where: {
+          username,
+        },
+      });
+      res.send({
+        user: _user,
+      });
+    } catch (error) {
+      res.status(500).send({
+        error: true,
+        msg: error,
+      });
     }
-
-    await prisma.user.findFirst({});
   },
 
   registerUser: async (req, res, next) => {
