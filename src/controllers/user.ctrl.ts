@@ -20,6 +20,8 @@ const userCtrl = {
       if (!valid) {
         res.send({ error: true, msg: "Password does not match." });
       } else {
+        // check whether to see if the user is already looged in.
+
         // create and return the json web token
         res.send({
           user,
@@ -154,11 +156,29 @@ const userCtrl = {
         token: jwt.sign({ id: user.id, role }, process.env.JWT_SECRET),
       });
     } catch (err) {
-      res.status(500).send({ error: err });
+      res.status(500).send({ error: true, msg: err });
       // if there's a problem creating the account, throw an error
       // throw new Error('Error creating account');
     }
     next();
+  },
+  logOutAll: async function (req, res, next) {
+    try {
+      const user = req.user;
+      await prisma.user.update({
+        data: {
+          loggedIn: 0,
+        },
+        where: {
+          id: user.id,
+        },
+      });
+      res.send({
+        msg: "All users logged out.",
+      });
+    } catch (error) {
+      res.status(500).send({ error: true, msg: error });
+    }
   },
 };
 
