@@ -17,25 +17,32 @@ import prisma from "../db";
 const endpointsCtrl = {
   deposit: async (req, res, next) => {
     const user = req.user;
-    const { amount } = req.body;
-    if (user.role === "buyer") {
-      const newUser = await prisma.user.update({
-        data: {
-          deposit: amount,
-        },
-        where: {
-          id: user.id,
-        },
-      });
-      res.send({
-        error: false,
-        msg: "Amount successfully deposited.",
-        user: newUser,
-      });
-    } else {
-      res.send({
+    try {
+      const { amount } = req.body;
+      if (user.role === "buyer") {
+        const newUser = await prisma.user.update({
+          data: {
+            deposit: amount,
+          },
+          where: {
+            id: user.id,
+          },
+        });
+        res.send({
+          error: false,
+          msg: "Amount successfully deposited.",
+          user: newUser,
+        });
+      } else {
+        res.send({
+          error: true,
+          msg: "User must be a buyer.",
+        });
+      }
+    } catch (error) {
+      res.status(500).send({
         error: true,
-        msg: "User must be a buyer.",
+        msg: error,
       });
     }
   },
@@ -54,32 +61,45 @@ const endpointsCtrl = {
             id: +productId,
           },
         });
-        const totalCost = +product?.cost * +amountOfProducts;
 
-        if (userData?.deposit > totalCost) {
-          await prisma.user.update({
-            data: {
-              deposit: +userData?.deposit - totalCost,
-            },
-            where: {
-              id: +user.id,
-            },
-          });
-          await prisma.product.update({
-            data: {
-              amountAvailable: +product.amountAvailable - amountOfProducts,
-            },
-            where: {
-              id: +product.id,
-            },
+        // check to see if there is enough of the products available
+        if (product.amountAvailable >= +amountOfProducts) {
+          const totalCost = +product?.cost * +amountOfProducts;
+
+          if (userData?.deposit >= totalCost) {
+            await prisma.user.update({
+              data: {
+                deposit: +userData?.deposit - totalCost,
+              },
+              where: {
+                id: +user.id,
+              },
+            });
+            await prisma.product.update({
+              data: {
+                amountAvailable: +product.amountAvailable - amountOfProducts,
+              },
+              where: {
+                id: +product.id,
+              },
+            });
+
+            res.send({
+              totalSpent: totalCost,
+              product,
+              change: +userData?.deposit - totalCost,
+            });
+          } else
+            res.send({
+              error: true,
+              msg: "You don't have enough deposit to buy this item.",
+            });
+        } else {
+          res.send({
+            error: true,
+            msg: "Not enough product to buy. You can decrease the amount you want.",
           });
         }
-
-        res.send({
-          totalSpent: totalCost,
-          product,
-          change: +userData?.deposit - totalCost,
-        });
       } else {
         res.send({
           error: true,
