@@ -43,11 +43,11 @@ describe("Test /buy Endpoint", () => {
         productId: 10,
         amountOfProducts: 2,
       });
-
     expect(res.status).toEqual(200);
     expect(res.body.error).toBeTruthy();
     expect(res.body.msg).toBe("User must be a buyer.");
   });
+
   it("POST The user with a 'buyer' role can buy a product", async () => {
     const userRes = await requestWithSupertest.post("/api/users/login").send({
       username: "chidume",

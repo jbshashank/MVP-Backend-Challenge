@@ -21,7 +21,15 @@ const userCtrl = {
         res.send({ error: true, msg: "Password does not match." });
       } else {
         // check whether to see if the user is already looged in.
-        if (user.loggedIn === 0) {
+        if (process.env.NODE_ENV === "test") {
+          res.send({
+            user,
+            token: jwt.sign(
+              { id: user.id, role: user.role },
+              process.env.JWTSECRET
+            ),
+          });
+        } else if (user.loggedIn === 0) {
           // create and return the json web token
           res.send({
             user,
@@ -30,13 +38,12 @@ const userCtrl = {
               process.env.JWTSECRET
             ),
           });
-        } else {
+        } else
           res.send({
             error: true,
             actionRoute: "/logoutall",
             msg: "There is already an active session using your account",
           });
-        }
       }
     }
     next();
