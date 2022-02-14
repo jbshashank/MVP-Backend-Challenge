@@ -213,7 +213,7 @@ const userCtrl = {
   },
   logOut: async function (req, res, next) {
     const { id } = req.body;
-    console.log(req.user);
+    // console.log(req.user);
     try {
       const user = req.user;
       if (id === user.id) {
