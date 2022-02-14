@@ -213,6 +213,7 @@ const userCtrl = {
   },
   logOut: async function (req, res, next) {
     const { id } = req.body;
+    console.log(req.user);
     try {
       const user = req.user;
       if (id === user.id) {
@@ -221,7 +222,7 @@ const userCtrl = {
             loggedIn: 0,
           },
           where: {
-            id: user.id,
+            id: +user.id,
           },
         });
         res.send({
@@ -234,6 +235,7 @@ const userCtrl = {
         });
       }
     } catch (error) {
+      // console.log(error);
       res.status(500).send({ error: true, msg: error });
     }
   },

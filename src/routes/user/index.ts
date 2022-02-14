@@ -43,7 +43,7 @@ const userRoutes = (router: Router) => {
   /**
    * logout user
    */
-  router.route("/users/logout").post(userCtrl.logOut);
+  router.route("/users/me/logout").put(userCtrl.logOut);
 };
 
 export default userRoutes;
